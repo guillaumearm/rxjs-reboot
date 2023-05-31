@@ -1,0 +1,77 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+trigger:
+  event:
+    exclude:
+      - tag
+
+steps:
+  - name: install_and_build
+    image: node:18
+    commands:
+      - npm install
+      - npm run build
+
+  - name: lint
+    image: node:18
+    commands:
+      - npm run lint
+    depends_on:
+      - install_and_build
+
+  - name: prettier
+    image: node:18
+    commands:
+      - npm run prettier:check
+    depends_on:
+      - install_and_build
+
+  - name: jest-unit-test
+    image: node:18
+    commands:
+      - npm run test
+    depends_on:
+      - install_and_build
+
+  - name: cucumber-functional-test
+    image: node:18
+    commands:
+      - npm run cucumber:prepare
+      - npm run cucumber:run
+    depends_on:
+      - install_and_build
+
+---
+kind: pipeline
+type: docker
+name: release
+
+depends_on:
+  - default
+
+trigger:
+  branch:
+    - master
+    - next
+
+steps:
+  - name: install_and_build
+    image: node:18
+    commands:
+      - npm install
+      - npm run build
+  - name: semantic_release
+    image: node:18
+    environment:
+      NPM_TOKEN:
+        from_secret: npm_token
+      GITEA_TOKEN:
+        from_secret: gitea_token
+      GITEA_URL: https://git.trapcodien.com
+    commands:
+      - npm run release
+    depends_on:
+      - install_and_build
