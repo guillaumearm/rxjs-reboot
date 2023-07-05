@@ -14,26 +14,37 @@ export interface SubscriberConstructor {
 /**
  * Implementation
  */
+
+const noop = () => {};
+
 export class Subscriber<T> extends Subscription implements Observer<T> {
+  private observer: Observer<T>;
+
   public constructor(obs: Partial<Observer<T>>) {
     super();
 
-    void obs;
-    throw new Error('TODO');
+    this.observer = {
+      next: obs.next ?? noop,
+      error: obs.error ?? noop,
+      complete: obs.complete ?? noop,
+    };
   }
 
   /* Observer implementation  */
   public next(value: T): void {
-    void value;
-    throw new Error('TODO');
+    if (this.closed) return;
+    this.observer.next(value);
   }
 
   public error(err: unknown): void {
-    void err;
-    throw new Error('TODO');
+    if (this.closed) return;
+    this.observer.error(err);
+    this.unsubscribe();
   }
 
   public complete(): void {
-    throw new Error('TODO');
+    if (this.closed) return;
+    this.observer.complete();
+    this.unsubscribe();
   }
 }
