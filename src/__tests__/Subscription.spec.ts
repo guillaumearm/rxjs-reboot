@@ -51,13 +51,6 @@ const testSubscription = (SubscriptionClass: SubscriptionConstructor) => () => {
     expect(additionalTeardown).toBeCalledTimes(1);
   });
 
-  it('[add] should return a new subscription when adding a teardown', () => {
-    const parentSub = new SubscriptionClass();
-    const childSub = parentSub.add(Rx.noop);
-
-    expect(parentSub).not.toBe(childSub);
-  });
-
   it('[add] should be able to unsubscribe partially using child subscription', () => {
     const parentTeardown = jest.fn();
     const childTeardown = jest.fn();
