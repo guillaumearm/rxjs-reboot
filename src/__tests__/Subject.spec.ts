@@ -200,6 +200,20 @@ const testSubject = (SubjectClass: SubjectConstructor) => () => {
     expect(sub.closed).toBe(true);
   });
 
+  it('[error] subscribe on a completed subject caused by an error should replay this error (even when the error is undefined)', () => {
+    const subject = new SubjectClass<number>();
+    const onError = jest.fn();
+    const onComplete = jest.fn();
+
+    subject.error(undefined);
+
+    const sub = subject.subscribe({ error: onError, complete: onComplete });
+
+    expect(onError).toBeCalledWith(undefined);
+    expect(onComplete).not.toBeCalled();
+    expect(sub.closed).toBe(true);
+  });
+
   it('[subscription] added teardown should be executed once on complete', () => {
     const subject = new SubjectClass<number>();
     const teardown = jest.fn();
