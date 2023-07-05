@@ -15,7 +15,7 @@ export interface SubscriptionConstructor {
   new (t?: Teardown): Subscription;
 }
 
-export type TeardownLogic = Subscription | Unsubscribable | (() => void) | void;
+export type TeardownLogic = Subscription | Unsubscribable | Teardown | void;
 
 /**
  * Implementation
@@ -38,8 +38,8 @@ export class Subscription implements ISubscription {
     throw new Error('TODO');
   }
 
-  public remove(s: TeardownLogic): void {
-    void s;
+  public remove(tl: TeardownLogic): void {
+    void tl;
     throw new Error('TODO');
   }
 }
