@@ -17,29 +17,47 @@ export interface SubscriptionConstructor {
 
 export type TeardownLogic = Subscription | Unsubscribable | Teardown | void;
 
+const noop = () => {};
+
+const executeTeardownLogic = (tl: TeardownLogic): void => {
+  if (typeof tl === 'function') {
+    tl();
+    return;
+  }
+
+  if (tl) {
+    tl.unsubscribe();
+  }
+};
+
 /**
  * Implementation
  */
 
 export class Subscription implements ISubscription {
+  private teardowns: TeardownLogic[] = [];
   public closed = false;
 
-  public constructor(action?: Teardown) {
-    void action;
-    throw new Error('TODO');
-  }
+  public constructor(private action: Teardown = noop) {}
 
   public unsubscribe(): void {
-    throw new Error('TODO');
+    if (this.closed) return;
+
+    this.closed = true;
+
+    executeTeardownLogic(this.action);
+    this.teardowns.forEach(executeTeardownLogic);
   }
 
   public add(tl: TeardownLogic): void {
-    void tl;
-    throw new Error('TODO');
+    if (this.closed) {
+      executeTeardownLogic(tl);
+    } else {
+      this.teardowns.push(tl);
+    }
   }
 
   public remove(tl: TeardownLogic): void {
-    void tl;
-    throw new Error('TODO');
+    this.teardowns = this.teardowns.filter(t => t !== tl);
   }
 }
