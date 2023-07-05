@@ -3,6 +3,7 @@
  */
 
 import { Observer } from './Observer';
+import { Subscriber } from './Subscriber';
 import { Subscription, TeardownLogic } from './Subscription';
 
 type SubscribeFunction<T> = (obs: Partial<Observer<T>>) => Subscription;
@@ -21,13 +22,17 @@ export interface ObservableConstructor {
  * Implementation
  */
 export class Observable<T> implements IObservable<T> {
-  constructor(subscriptionFactory: SubscriptionFactory<T>) {
-    void subscriptionFactory;
-    throw new Error('TODO');
-  }
+  constructor(private subscriptionFactory: SubscriptionFactory<T>) {}
 
   subscribe(obs: Partial<Observer<T>>): Subscription {
-    void obs;
-    throw new Error('TODO');
+    const subscriber = new Subscriber(obs);
+
+    try {
+      subscriber.add(this.subscriptionFactory(subscriber));
+    } catch (e) {
+      subscriber.error(e);
+    }
+
+    return subscriber;
   }
 }
